@@ -31,7 +31,7 @@
     <issue>https://issues.apache.org/jira/browse/CB/component/12320645</issue>
 
     <js-module src="www/speech_api.js" name="myspeech">
-         <clobbers target="navigator.myspeech" />
+         <clobbers target="navigator.myspeechApis" />
     </js-module>
 
     <!-- android -->
@@ -46,6 +46,12 @@
         </config-file>
 
         <source-file src="src/android/MySpeech.java" target-dir="src/org/ioniconline" />
+        <source-file src="src/android/libs/armeabi/libmsc.so" target-dir="libs/armeabi" />
+        <source-file src="src/android/libs/armeabi-v7a/libmsc.so" target-dir="libs/armeabi-v7a" />
+        <source-file src="src/android/libs/mips/libmsc.so" target-dir="libs/mips" />
+        <source-file src="src/android/libs/x86/libmsc.so" target-dir="libs/x86" />
+        <source-file src="src/android/libs/Msc.jar" target-dir="libs" />
+        <source-file src="src/android/libs/Sunflower.jar" target-dir="libs" />
 
      </platform>
 
