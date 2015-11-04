@@ -1,21 +1,28 @@
 var myspeechApis = {};
 
-myspeechApis.tryInitEngine = function(okCb, failCb, opt) {
+myspeechApis.tryInitEngine = function(okCb, failCb) {
+    console.error("plugin JS called");
     cordova.exec(okCb, failCb,
             "MySpeech", // service
             "init", // action name
-            {} // a blank option
+            [] // a blank option
             );
+    console.error("JS call ended");
 };
 
 myspeechApis.tryListening = function(okCb, failCb, opt) {
+    cordova.exec(okCb, failCb,
+            "MySpeech", // service
+            "listen", // action name
+            opt
+            );
 };
 
 myspeechApis.trySpeak = function(okCb, failCb, opt) {
     cordova.exec(okCb, failCb,
             "MySpeech", // service
             "speak", // action name
-            ["a", "b", 1, 2]
+            opt
             );
 };
 
