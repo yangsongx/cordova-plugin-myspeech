@@ -19,6 +19,7 @@ myspeechApis.tryListening = function(okCb, failCb, opt) {
 };
 
 myspeechApis.trySpeak = function(okCb, failCb, opt) {
+    console.error("in speak JS code...");
     cordova.exec(okCb, failCb,
             "MySpeech", // service
             "speak", // action name

@@ -29,7 +29,8 @@ public class MySpeech extends CordovaPlugin {
     private static final String TAG = "MySpeech";
     //
     // the APPID got from the web
-    private static final String YOUR_APP_ID = "5631ca67";
+    //private static final String YOUR_APP_ID = "5631ca67";
+    private static final String YOUR_APP_ID = "576206f0";
 
     // Totally - 8
     private static final String [] mVoiceName = {
@@ -56,7 +57,7 @@ public class MySpeech extends CordovaPlugin {
     private InitListener initListener = new InitListener() {
         @Override
         public void onInit(int code) {
-            android.util.Log.e(TAG, "ini code:" + code);
+            android.util.Log.e(TAG, "onInit code:" + code);
         }
     };
 
