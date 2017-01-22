@@ -1,5 +1,7 @@
 /**
+ * A plugin for XunFei voice feature.
  *
+ * [2017-01-22] Avoid blocking the main thread
  */
 package org.ioniconline;
 
@@ -114,7 +116,7 @@ public class MySpeech extends CordovaPlugin {
     };
 
     @Override
-    public boolean execute(String action, JSONArray args, CallbackContext cb) throws JSONException {
+    public boolean execute(String action, JSONArray args, final CallbackContext cb) throws JSONException {
         boolean ret = true;
 
         mCb = cb;
@@ -124,19 +126,31 @@ public class MySpeech extends CordovaPlugin {
 
             // Init ...
             //
-            android.util.Log.e(TAG, "init the engine...");
-            SpeechUtility.createUtility(cordova.getActivity(),
-                    SpeechConstant.APPID + "=" + YOUR_APP_ID);
-            mListen = SpeechRecognizer.createRecognizer(
-                    this.cordova.getActivity(),
-                    initListener/* use null listen */);
-            if(mListen == null){
-                android.util.Log.e(TAG, "listener is a null obj...");
-                cb.error("XunFei plugin init with null result[Failed]");
-            } else {
-                android.util.Log.i(TAG, "got a listener, cool.");
-                cb.success("init XunFei plugin [OK]");
-            }
+            android.util.Log.e(TAG, "init the engine in background...");
+
+            cordova.getThreadPool().execute(new Runnable(){
+                        @Override
+                        public void run(){
+                            SpeechUtility.createUtility(
+                                cordova.getActivity(),
+                                SpeechConstant.APPID + "=" + YOUR_APP_ID);
+                            mListen = SpeechRecognizer.createRecognizer(
+                                cordova.getActivity(),
+                                initListener/* use null listen */);
+                            if(mListen == null){
+                                android.util.Log.e(TAG, "listener is a null obj...");
+                                cb.error("XunFei plugin init with null result[Failed]");
+                            } else {
+                                android.util.Log.i(TAG, "got a listener, cool.");
+                                cb.success("init XunFei plugin [OK]");
+                            }
+                        }
+                    });
+
+
+
+
+
 
         } else if (action.equals("speak")) {
 
