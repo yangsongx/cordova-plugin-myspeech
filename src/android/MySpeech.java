@@ -129,6 +129,13 @@ public class MySpeech extends CordovaPlugin {
             mListen = SpeechRecognizer.createRecognizer(
                     this.cordova.getActivity(),
                     initListener/* use null listen */);
+            if(mListen == null){
+                android.util.Log.e(TAG, "listener is a null obj...");
+                cb.error("XunFei plugin init with null result[Failed]");
+            } else {
+                android.util.Log.i(TAG, "got a listener, cool.");
+                cb.success("init XunFei plugin [OK]");
+            }
 
         } else if (action.equals("speak")) {
 
