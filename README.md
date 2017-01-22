@@ -7,6 +7,13 @@ It can be usable in Ionic Framework APK.
 
 ## Usage
 
-> $ ionic plugin add
+> $ ionic plugin add https://github.com/yangsongx/cordova-plugin-myspeech
 
-Now, add code like this:
+Now, add code like this(in your JS script, usually):
+
+> navigator.myspeechApis.tryInitEngine(
+>         function(goodData) {
+>         },
+>         function(badData) {
+>         },
+>         []);
