@@ -76,10 +76,15 @@ public class MySpeech extends CordovaPlugin {
         }
         @Override
         public void onError(SpeechError error) {
+            android.util.Log.e(TAG, "onError meet:" + error);
+            if(error.getErrorCode() == 10118) {
+                android.util.Log.e(TAG, "You said nothing at all!");
+                mCb.error("Say Nothing!");
+            }
         }
         @Override
         public void onEndOfSpeech() {
-            android.util.Log.e(TAG, "end of speech");
+            android.util.Log.e(TAG, "<end of speech");
         }
 
         @Override
