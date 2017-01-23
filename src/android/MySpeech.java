@@ -179,7 +179,14 @@ public class MySpeech extends CordovaPlugin {
 
             // Listen ...
             //
-            android.util.Log.e(TAG, "listening...");
+            android.util.Log.i(TAG, "listening...");
+
+            if(mListen == null){
+                android.util.Log.e(TAG, "null listen obj, probably not inited engine.");
+                cb.error("engine not inited");
+                return false;
+            }
+
             mListen.setParameter(SpeechConstant.PARAMS, null);
             mListen.setParameter(SpeechConstant.ENGINE_TYPE,SpeechConstant.TYPE_CLOUD);
             mListen.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
