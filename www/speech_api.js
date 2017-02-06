@@ -27,4 +27,31 @@ myspeechApis.trySpeak = function(okCb, failCb, opt) {
             );
 };
 
+myspeechApis.initWakeup = function(okCb, failCb, opt) {
+    console.error("in wakeup JS code...");
+    cordova.exec(okCb, failCb,
+            "MySpeech", // service
+            "initWakeup", // action name
+            opt
+            );
+};
+
+myspeechApis.startWakeup = function(okCb, failCb, opt) {
+    console.error("in start wakeup JS code...");
+    cordova.exec(okCb, failCb,
+            "MySpeech", // service
+            "startWakeup", // action name
+            opt
+            );
+};
+
+myspeechApis.stopWakeup = function(okCb, failCb, opt) {
+    console.error("in stop wakeup JS code...");
+    cordova.exec(okCb, failCb,
+            "MySpeech", // service
+            "stopWakeup", // action name
+            opt
+            );
+};
+
 module.exports = myspeechApis;

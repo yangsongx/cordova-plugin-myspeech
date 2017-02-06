@@ -1,9 +1,12 @@
 /**
  * A plugin for XunFei voice feature.
  *
+ * [2017-02-06] Try support voice wakeup.
  * [2017-01-22] Avoid blocking the main thread
  */
 package org.ioniconline;
+
+import android.os.Bundle;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -13,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import com.iflytek.cloud.WakeuperResult;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.LexiconListener;
@@ -23,6 +27,11 @@ import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechRecognizer;
 import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SpeechUtility;
+
+import com.iflytek.cloud.WakeuperListener;
+import com.iflytek.cloud.VoiceWakeuper;
+import com.iflytek.cloud.util.ResourceUtil;
+import com.iflytek.cloud.util.ResourceUtil.RESOURCE_TYPE;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -47,6 +56,11 @@ public class MySpeech extends CordovaPlugin {
     };
 
     private CallbackContext mCb;
+
+    private boolean mFirstCall = false;
+
+    // the wakeup obj
+    private VoiceWakeuper mWakeup = null;
 
     // the speaker
     private SpeechSynthesizer mSynth = null;
@@ -127,6 +141,16 @@ public class MySpeech extends CordovaPlugin {
         mCb = cb;
 
         android.util.Log.e(TAG, "coming with " + action + " action");
+
+        if(mFirstCall == false) {
+            android.util.Log.i(TAG, "call speech util only once.");
+            SpeechUtility.createUtility(
+                    cordova.getActivity(),
+                    SpeechConstant.APPID + "=" + YOUR_APP_ID);
+
+            mFirstCall = true; // DO NOT Call it twice
+        }
+
         if (action.equals("init")) {
 
             // Init ...
@@ -136,9 +160,6 @@ public class MySpeech extends CordovaPlugin {
             cordova.getThreadPool().execute(new Runnable(){
                         @Override
                         public void run(){
-                            SpeechUtility.createUtility(
-                                cordova.getActivity(),
-                                SpeechConstant.APPID + "=" + YOUR_APP_ID);
                             mListen = SpeechRecognizer.createRecognizer(
                                 cordova.getActivity(),
                                 initListener/* use null listen */);
@@ -149,6 +170,7 @@ public class MySpeech extends CordovaPlugin {
                                 android.util.Log.i(TAG, "got a listener, cool.");
                                 cb.success("init XunFei plugin [OK]");
                             }
+
                         }
                     });
 
@@ -200,6 +222,42 @@ public class MySpeech extends CordovaPlugin {
             mFinalResult = new StringBuffer();
             if(mListen.startListening(mRecognizerListener) != ErrorCode.SUCCESS) {
                 android.util.Log.e(TAG, "Failed listen to you!");
+            }
+
+        } else if (action.equals("initWakeup")) {
+            android.util.Log.i(TAG, "Try Init Wakeup");
+
+            cordova.getThreadPool().execute(new Runnable(){
+                @Override
+                public void run(){
+                    mWakeup = VoiceWakeuper.createWakeuper(
+                        cordova.getActivity(), null);
+                    if(mWakeup == null) {
+                        cb.error("wakeuper creation got a null obj");
+                    } else {
+                        android.util.Log.i(TAG, "wakuper obj creation[OK]");
+                        cb.success("init wakeup good");
+                    }
+
+                    //initWakeupFeature();
+                }
+            });
+
+        } else if (action.equals("startWakeup")){
+            if(mWakeup != null) {
+                /* listener will send back result later */
+                mWakeup.startListening(mWakeuperListener);
+            } else {
+                android.util.Log.e(TAG, "null wakeup obj, do nohting");
+                cb.error("error in start wakeup");
+            }
+        } else if(action.equals("stopWakeup")) {
+            android.util.Log.i(TAG, "Try Stop Wakeup");
+
+            if(mWakeup != null) {
+                mWakeup.stopListening();
+            } else {
+                android.util.Log.e(TAG, "null wakeup obj, do nohting");
             }
 
         } else {
@@ -257,7 +315,75 @@ public class MySpeech extends CordovaPlugin {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		} 
+		}
 		return ret.toString();
 	}
+
+    private int initWakeupFeature(){
+
+        StringBuffer param =new StringBuffer();
+        String resPath = ResourceUtil.generateResourcePath(
+                cordova.getActivity(),
+                RESOURCE_TYPE.assets,
+                "ivw/576206f0.jet");
+        param.append(","+ResourceUtil.ENGINE_START+"="+SpeechConstant.ENG_IVW);
+        SpeechUtility.getUtility().setParameter(
+                ResourceUtil.ENGINE_START,
+                param.toString());
+
+        mWakeup.setParameter(SpeechConstant.IVW_THRESHOLD,
+                "0:"+10/* configable */);
+        mWakeup.setParameter(SpeechConstant.IVW_SST,
+                "wakeup");
+
+        /* FIXME and TODO - 1 means keep alive,
+         * if set with 0, the wakup action will auto-closed
+         * after a successful wakup
+         *
+         * Consider set this properly in the future.
+         */
+        mWakeup.setParameter(SpeechConstant.KEEP_ALIVE,"1");
+
+        return 0;
+    }
+
+    private WakeuperListener mWakeuperListener = new WakeuperListener() {
+        @Override
+        public void onResult(WakeuperResult result) {
+            try{
+                String text = result.getResultString();
+                android.util.Log.e(TAG, "wakeup listen onResult:" + text);
+
+                JSONObject jsobj = new JSONObject(text);
+
+                android.util.Log.i(TAG, "The wakeup word id:" + jsobj.optString("id"));
+                
+
+                mCb.success("COOL");
+
+            } catch (JSONException e) {
+                android.util.Log.e(TAG, "Exception meet on wakup listen");
+            }
+        }
+
+        @Override
+	public void onVolumeChanged(int volume) {
+        }
+
+        @Override
+        public void onError(SpeechError error) {
+        }
+
+        @Override
+        public void onBeginOfSpeech() {
+        }
+
+        @Override
+        public void onEvent(int eventType, int arg1, int arg2, Bundle obj) {
+            if (com.iflytek.cloud.SpeechEvent.EVENT_IVW_RESULT == eventType) {
+                RecognizerResult reslut =
+                    ((RecognizerResult)obj.get(com.iflytek.cloud.SpeechEvent.KEY_EVENT_IVW_RESULT));
+            }
+        }
+    };
 }

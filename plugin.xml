@@ -57,6 +57,7 @@
         <source-file src="src/android/libs/Msc.jar" target-dir="libs" />
         <source-file src="src/android/libs/Sunflower.jar" target-dir="libs" />
 
+        <source-file src="src/android/assets/ivw/576206f0.jet" target-dir="assets/ivw/"/>
      </platform>
 
 </plugin>
