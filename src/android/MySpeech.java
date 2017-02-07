@@ -238,7 +238,8 @@ public class MySpeech extends CordovaPlugin {
                         cb.error("wakeuper creation got a null obj");
                     } else {
                         android.util.Log.i(TAG, "wakuper obj creation[OK]");
-                        initWakeupFeature();
+                        //DO NOT CALL this at init phase...
+                        //initWakeupFeature();
                         cb.success("init wakeup good");
                     }
 
@@ -247,6 +248,7 @@ public class MySpeech extends CordovaPlugin {
 
         } else if (action.equals("startWakeup")){
             if(mWakeup != null) {
+                initWakeupFeature();
                 /* listener will send back result later */
                 android.util.Log.i(TAG, "set the listeners...");
                 mWakeup.startListening(mWakeuperListener);
