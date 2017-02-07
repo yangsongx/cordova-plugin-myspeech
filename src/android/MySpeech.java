@@ -91,7 +91,8 @@ public class MySpeech extends CordovaPlugin {
         @Override
         public void onError(SpeechError error) {
             android.util.Log.e(TAG, "onError meet:" + error);
-            if(error.getErrorCode() == 10118) {
+            if(error.getErrorCode() == 10118
+               || ErrorCode.MSP_ERROR_NO_DATA == error.getErrorCode()) {
                 android.util.Log.e(TAG, "You said nothing at all!");
                 mCb.error("Say Nothing!");
             }
@@ -134,14 +135,8 @@ public class MySpeech extends CordovaPlugin {
         }
     };
 
-    @Override
-    public boolean execute(String action, JSONArray args, final CallbackContext cb) throws JSONException {
-        boolean ret = true;
-
-        mCb = cb;
-
-        android.util.Log.e(TAG, "coming with " + action + " action");
-
+    /* FIXME - call this in two thread Pool won't cause race-condition? */
+    private int initSafe() {
         if(mFirstCall == false) {
             android.util.Log.i(TAG, "call speech util only once.");
             SpeechUtility.createUtility(
@@ -150,6 +145,16 @@ public class MySpeech extends CordovaPlugin {
 
             mFirstCall = true; // DO NOT Call it twice
         }
+        return 0;
+    }
+
+    @Override
+    public boolean execute(String action, JSONArray args, final CallbackContext cb) throws JSONException {
+        boolean ret = true;
+
+        mCb = cb;
+
+        android.util.Log.e(TAG, "coming with " + action + " action");
 
         if (action.equals("init")) {
 
@@ -160,6 +165,7 @@ public class MySpeech extends CordovaPlugin {
             cordova.getThreadPool().execute(new Runnable(){
                         @Override
                         public void run(){
+                            initSafe();
                             mListen = SpeechRecognizer.createRecognizer(
                                 cordova.getActivity(),
                                 initListener/* use null listen */);
@@ -173,11 +179,6 @@ public class MySpeech extends CordovaPlugin {
 
                         }
                     });
-
-
-
-
-
 
         } else if (action.equals("speak")) {
 
@@ -230,22 +231,24 @@ public class MySpeech extends CordovaPlugin {
             cordova.getThreadPool().execute(new Runnable(){
                 @Override
                 public void run(){
+                    initSafe();
                     mWakeup = VoiceWakeuper.createWakeuper(
                         cordova.getActivity(), null);
                     if(mWakeup == null) {
                         cb.error("wakeuper creation got a null obj");
                     } else {
                         android.util.Log.i(TAG, "wakuper obj creation[OK]");
+                        initWakeupFeature();
                         cb.success("init wakeup good");
                     }
 
-                    //initWakeupFeature();
                 }
             });
 
         } else if (action.equals("startWakeup")){
             if(mWakeup != null) {
                 /* listener will send back result later */
+                android.util.Log.i(TAG, "set the listeners...");
                 mWakeup.startListening(mWakeuperListener);
             } else {
                 android.util.Log.e(TAG, "null wakeup obj, do nohting");
@@ -326,14 +329,21 @@ public class MySpeech extends CordovaPlugin {
                 cordova.getActivity(),
                 RESOURCE_TYPE.assets,
                 "ivw/576206f0.jet");
+        param.append(ResourceUtil.IVW_RES_PATH+"="+resPath);
         param.append(","+ResourceUtil.ENGINE_START+"="+SpeechConstant.ENG_IVW);
+
         SpeechUtility.getUtility().setParameter(
                 ResourceUtil.ENGINE_START,
                 param.toString());
 
-        mWakeup.setParameter(SpeechConstant.IVW_THRESHOLD,
-                "0:"+10/* configable */);
-        mWakeup.setParameter(SpeechConstant.IVW_SST,
+        android.util.Log.e(TAG, "p:" + param.toString());
+
+        mWakeup.setParameter(
+                SpeechConstant.IVW_THRESHOLD,
+                "0:60;1:60");
+
+        mWakeup.setParameter(
+                SpeechConstant.IVW_SST,
                 "wakeup");
 
         /* FIXME and TODO - 1 means keep alive,
@@ -342,7 +352,7 @@ public class MySpeech extends CordovaPlugin {
          *
          * Consider set this properly in the future.
          */
-        mWakeup.setParameter(SpeechConstant.KEEP_ALIVE,"1");
+        mWakeup.setParameter(SpeechConstant.KEEP_ALIVE,"0");
 
         return 0;
     }
@@ -357,7 +367,7 @@ public class MySpeech extends CordovaPlugin {
                 JSONObject jsobj = new JSONObject(text);
 
                 android.util.Log.i(TAG, "The wakeup word id:" + jsobj.optString("id"));
-                
+
 
                 mCb.success("COOL");
 
@@ -367,19 +377,29 @@ public class MySpeech extends CordovaPlugin {
         }
 
         @Override
-	public void onVolumeChanged(int volume) {
+        public void onVolumeChanged(int volume) {
+            android.util.Log.e(TAG, "onVolumeChanged");
         }
 
         @Override
         public void onError(SpeechError error) {
+            /* NOTE
+             * 10000~20000 are ranges in C/C++ Layer
+             * 20000~      are ranges in Java/Jar Layer
+             */
+            android.util.Log.e(TAG, "wakeup error:" +
+                    error.getErrorCode() + ", " +
+                    error.getErrorDescription());
         }
 
         @Override
         public void onBeginOfSpeech() {
+            android.util.Log.e(TAG, "onBeginOfSpeech");
         }
 
         @Override
         public void onEvent(int eventType, int arg1, int arg2, Bundle obj) {
+            android.util.Log.e(TAG, "onEvent");
             if (com.iflytek.cloud.SpeechEvent.EVENT_IVW_RESULT == eventType) {
                 RecognizerResult reslut =
                     ((RecognizerResult)obj.get(com.iflytek.cloud.SpeechEvent.KEY_EVENT_IVW_RESULT));
