@@ -342,7 +342,7 @@ public class MySpeech extends CordovaPlugin {
 
         mWakeup.setParameter(
                 SpeechConstant.IVW_THRESHOLD,
-                "0:60;1:60");
+                "0:40;1:40");
 
         mWakeup.setParameter(
                 SpeechConstant.IVW_SST,
