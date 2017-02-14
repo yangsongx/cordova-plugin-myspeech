@@ -62,4 +62,20 @@ myspeechApis.tryInitCamera = function(okCb, failCb, opt) {
             );
 };
 
+myspeechApis.cleanCamera = function(okCb, failCb, opt) {
+    cordova.exec(okCb, failCb,
+            "MySpeech", // service
+            "cleanCamera", // action name
+            opt
+            );
+};
+
+myspeechApis.startCameraPreview = function(okCb, failCb, opt) {
+    cordova.exec(okCb, failCb,
+            "MySpeech", // service
+            "startCameraPreview", // action name
+            opt
+            );
+};
+
 module.exports = myspeechApis;

@@ -7,8 +7,12 @@
  */
 package org.ioniconline;
 
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.os.Bundle;
 import android.hardware.Camera;
+import android.util.Base64;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -35,6 +39,13 @@ import com.iflytek.cloud.VoiceWakeuper;
 import com.iflytek.cloud.util.ResourceUtil;
 import com.iflytek.cloud.util.ResourceUtil.RESOURCE_TYPE;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -60,6 +71,62 @@ public class MySpeech extends CordovaPlugin {
     private CallbackContext mCb;
 
     private CallbackContext mCamCb;
+
+    private Camera.PreviewCallback mCamCallback =
+        new Camera.PreviewCallback() {
+            @Override
+            public void onPreviewFrame(byte[] arg0, Camera arg1) {
+                android.util.Log.e(TAG, "Wow, incoming with "
+                        + arg0.length + " Bytes data");
+                if (arg1.getParameters().getPreviewFormat() != ImageFormat.NV21){
+                    android.util.Log.e(TAG, "probably not correct format, check hardware");
+
+                    // FIXME - currently, we just need one frame at one time
+                    stopCameraPreview();
+                    mCamCb.error("Check your hardware!");
+                    return;
+                }
+
+                String imgB64Val = "";
+                YuvImage image = new YuvImage(arg0, ImageFormat.NV21,
+                        mCamPrevSize.width,
+                        mCamPrevSize.height,
+                        null);
+
+                File pic = new File(mCamDefaultImgName);
+                FileOutputStream outputStream;
+                try{
+                    outputStream = new FileOutputStream(pic);
+                    image.compressToJpeg(new Rect(0, 0, image.getWidth(),
+                                image.getHeight()),
+                            70,  outputStream);
+
+                    outputStream.close();
+
+                    imgB64Val = imageBase64Format(mCamDefaultImgName);
+
+                    mCamCb.success(imgB64Val);
+
+                    // FIXME - currently, we just need one frame at one time
+                    stopCameraPreview();
+
+                } catch (FileNotFoundException e) {
+                    android.util.Log.e(TAG, "exception");
+                    e.printStackTrace();
+                    // FIXME - need send to JS for such case?
+                } catch (IOException ex) {
+                    android.util.Log.e(TAG, "exception in IO.");
+                    ex.printStackTrace();
+                }
+
+            }
+        };
+
+    private Camera.Size mCamPrevSize;
+    private byte [] mCamPrevBuf;
+
+    // FIXME - a temp debug code...
+    private String mCamDefaultImgName = "/sdcard/my.jpg";
 
     private boolean mFirstCall = false;
 
@@ -193,6 +260,11 @@ public class MySpeech extends CordovaPlugin {
         } else if (action.equals("cleanCamera")) {
 
             cleanAndroidCamera(cb);
+
+        } else if (action.equals("startCameraPreview")) {
+
+            mCamCb = cb;
+            startCameraPreview(cb);
 
         } else if (action.equals("speak")) {
 
@@ -476,11 +548,50 @@ public class MySpeech extends CordovaPlugin {
         }
 
         mCamera.setDisplayOrientation(90);
+        mCamera.setPreviewCallbackWithBuffer(mCamCallback);
+        mCamPrevSize = mCamera.getParameters().getPreviewSize();
+
+        android.util.Log.e(TAG, "the preview w:"
+                + mCamPrevSize.width + ", h:" + mCamPrevSize.height);
+
+        if(mCamPrevBuf == null) {
+            android.util.Log.i(TAG, "first time, new the buffer");
+            mCamPrevBuf =
+                new byte[(((mCamPrevSize.width) * mCamPrevSize.height) * android.graphics.ImageFormat.getBitsPerPixel(android.graphics.ImageFormat.NV21)) / 8];
+        }
+
+        mCamera.addCallbackBuffer(mCamPrevBuf);
+
+        //let's do it!
+        mCamera.startPreview();
 
         return 0;
     }
 
     private int stopCameraPreview() {
+        if(mCamera == null) {
+            android.util.Log.e(TAG, "already null camera obj");
+            return -1;
+        }
+
+        mCamera.stopPreview();
+
         return 0;
+    }
+
+    private String imageBase64Format(String fn) throws FileNotFoundException, IOException {
+        String b64str = "";
+
+        File file = new File(fn);
+        int fileSize = (int)file.length();
+        byte[] binBuf = new byte[fileSize];
+        FileInputStream in = new FileInputStream(file);
+        DataInputStream ds = new DataInputStream(in);
+        ds.read(binBuf, 0, fileSize);
+        ds.close();
+        in.close();
+        b64str = Base64.encodeToString(binBuf, Base64.DEFAULT);
+
+        return b64str;
     }
 }
