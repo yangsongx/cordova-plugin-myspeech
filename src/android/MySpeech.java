@@ -1,12 +1,14 @@
 /**
  * A plugin for XunFei voice feature.
  *
+ * [2017-02-14] Add camera input method
  * [2017-02-06] Try support voice wakeup.
  * [2017-01-22] Avoid blocking the main thread
  */
 package org.ioniconline;
 
 import android.os.Bundle;
+import android.hardware.Camera;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -57,6 +59,8 @@ public class MySpeech extends CordovaPlugin {
 
     private CallbackContext mCb;
 
+    private CallbackContext mCamCb;
+
     private boolean mFirstCall = false;
 
     // the wakeup obj
@@ -76,6 +80,8 @@ public class MySpeech extends CordovaPlugin {
             android.util.Log.e(TAG, "onInit code:" + code);
         }
     };
+
+    private Camera mCamera;
 
     private RecognizerListener mRecognizerListener = new RecognizerListener() {
         @Override
@@ -179,6 +185,14 @@ public class MySpeech extends CordovaPlugin {
 
                         }
                     });
+
+        } else if (action.equals("initCamera")) {
+
+            initAndroidCamera(args, cb);
+
+        } else if (action.equals("cleanCamera")) {
+
+            cleanAndroidCamera(cb);
 
         } else if (action.equals("speak")) {
 
@@ -408,4 +422,60 @@ public class MySpeech extends CordovaPlugin {
             }
         }
     };
+
+    private int initAndroidCamera(JSONArray args, final CallbackContext cb) {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+            // Camera legacy interface
+        } else {
+            // camera2 new interface
+        }
+
+        /* FIXME - currently, still use legacy interface, in
+         * the future, SHOULD use newer camera2 interface
+         */
+
+        try{
+            int idx = args.getInt(0);
+            android.util.Log.i(TAG, "Try init [" + idx + "] camera.");
+            mCamera = Camera.open(idx);
+            if(mCamera == null) {
+                android.util.Log.e(TAG, "null obj for opening camera");
+                cb.error("camera open got null obj");
+            } else {
+                cb.success("camera open OK");
+            }
+        } catch (JSONException ex) {
+            android.util.Log.e(TAG, "Exception in init");
+            cb.error("exception");
+        }
+
+        return 0;
+    }
+
+    private int cleanAndroidCamera(final CallbackContext cb) {
+        if(mCamera != null) {
+            mCamera.stopPreview(); // is it necessary?
+            mCamera.release();
+            mCamera = null;
+        }
+
+        cb.success("cleaned OK");
+        return 0;
+    }
+
+    private int startCameraPreview(final CallbackContext cb) {
+        if(mCamera == null) {
+            android.util.Log.e(TAG, "null camera, do nothing");
+            cb.error("null camera obj");
+            return -1;
+        }
+
+        mCamera.setDisplayOrientation(90);
+
+        return 0;
+    }
+
+    private int stopCameraPreview() {
+        return 0;
+    }
 }

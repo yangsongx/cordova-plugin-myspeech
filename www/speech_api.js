@@ -54,4 +54,12 @@ myspeechApis.stopWakeup = function(okCb, failCb, opt) {
             );
 };
 
+myspeechApis.tryInitCamera = function(okCb, failCb, opt) {
+    cordova.exec(okCb, failCb,
+            "MySpeech", // service
+            "initCamera", // action name
+            opt
+            );
+};
+
 module.exports = myspeechApis;
