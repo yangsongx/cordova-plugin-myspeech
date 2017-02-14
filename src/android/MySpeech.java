@@ -246,21 +246,36 @@ public class MySpeech extends CordovaPlugin {
                 @Override
                 public void run(){
                     initSafe();
-                    mWakeup = VoiceWakeuper.createWakeuper(
-                        cordova.getActivity(), null);
-                    if(mWakeup == null) {
-                        cb.error("wakeuper creation got a null obj");
-                    } else {
-                        android.util.Log.i(TAG, "wakuper obj creation[OK]");
-                        //DO NOT CALL this at init phase...
-                        //initWakeupFeature();
-                        cb.success("init wakeup good");
-                    }
+                    cb.success("init my wakeup good");
 
                 }
             });
 
         } else if (action.equals("startWakeup")){
+            StringBuffer param =new StringBuffer();
+            String resPath = ResourceUtil.generateResourcePath(
+                    cordova.getActivity(),
+                    RESOURCE_TYPE.assets,
+                    "ivw/576206f0.jet");
+            param.append(ResourceUtil.IVW_RES_PATH+"="+resPath);
+            param.append(","+ResourceUtil.ENGINE_START+"="+SpeechConstant.ENG_IVW);
+
+            SpeechUtility.getUtility().setParameter(
+                    ResourceUtil.ENGINE_START,
+                    param.toString());
+
+            android.util.Log.e(TAG, "p:" + param.toString());
+
+            mWakeup = VoiceWakeuper.createWakeuper(
+                cordova.getActivity(), null);
+            if(mWakeup == null) {
+                cb.error("wakeuper creation got a null obj");
+            } else {
+                android.util.Log.i(TAG, "wakuper obj creation[OK]");
+                //DO NOT CALL this at init phase...
+                //initWakeupFeature();
+                // cb.success("createWakeuper good");
+            }
             if(mWakeup != null) {
                 initWakeupFeature();
                 /* listener will send back result later */
@@ -275,8 +290,12 @@ public class MySpeech extends CordovaPlugin {
 
             if(mWakeup != null) {
                 mWakeup.stopListening();
+                mWakeup.destroy();
+                mWakeup = null;
+                cb.success("success stop wakeup");
             } else {
                 android.util.Log.e(TAG, "null wakeup obj, do nohting");
+                cb.success("success stop null wakeup");
             }
 
         } else {
@@ -340,23 +359,9 @@ public class MySpeech extends CordovaPlugin {
 
     private int initWakeupFeature(){
 
-        StringBuffer param =new StringBuffer();
-        String resPath = ResourceUtil.generateResourcePath(
-                cordova.getActivity(),
-                RESOURCE_TYPE.assets,
-                "ivw/576206f0.jet");
-        param.append(ResourceUtil.IVW_RES_PATH+"="+resPath);
-        param.append(","+ResourceUtil.ENGINE_START+"="+SpeechConstant.ENG_IVW);
-
-        SpeechUtility.getUtility().setParameter(
-                ResourceUtil.ENGINE_START,
-                param.toString());
-
-        android.util.Log.e(TAG, "p:" + param.toString());
-
         mWakeup.setParameter(
                 SpeechConstant.IVW_THRESHOLD,
-                "0:40;1:40");
+                "0:20;1:20");
 
         mWakeup.setParameter(
                 SpeechConstant.IVW_SST,
