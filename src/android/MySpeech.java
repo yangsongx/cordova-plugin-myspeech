@@ -359,7 +359,9 @@ public class MySpeech extends CordovaPlugin {
             }
         } else if(action.equals("stopWakeup")) {
             android.util.Log.i(TAG, "Try Stop Wakeup");
-
+            if (mWakeup == null) {
+                mWakeup = VoiceWakeuper.getWakeuper();
+            }
             if(mWakeup != null) {
                 mWakeup.stopListening();
                 mWakeup.destroy();
