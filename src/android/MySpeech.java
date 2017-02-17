@@ -125,6 +125,8 @@ public class MySpeech extends CordovaPlugin {
     private Camera.Size mCamPrevSize;
     private byte [] mCamPrevBuf;
 
+    private int mPreviewFlag = 0; // 1 means keep previewing, otherwise is one-shot
+
     // FIXME - a temp debug code...
     private String mCamDefaultImgName = "/sdcard/my.jpg";
 
@@ -272,7 +274,7 @@ public class MySpeech extends CordovaPlugin {
         } else if (action.equals("startCameraPreview")) {
 
             mCamCb = cb;
-            startCameraPreview(cb);
+            startCameraPreview(args, cb);
 
         } else if (action.equals("speak")) {
 
@@ -521,9 +523,19 @@ public class MySpeech extends CordovaPlugin {
          * the future, SHOULD use newer camera2 interface
          */
 
+        String model = new android.os.Build().MODEL;
+        if(model.equals("MSM8916 for arm64") == false) {
+            /* FIXME - is it correct for QLove device? */
+            android.util.Log.e(TAG, "Sorry, only QLOVE DEVICE can do this.");
+            cb.error("Non-Qlove device");
+            return -1;
+        }
+
         try{
             int idx = args.getInt(0);
-            android.util.Log.i(TAG, "Try init [" + idx + "] camera.");
+            mPreviewFlag = args.getInt(1);
+            android.util.Log.i(TAG, "Try init [" + idx + "] camera, with " + mPreviewFlag + " preview flag");
+
             mCamera = Camera.open(idx);
             if(mCamera == null) {
                 android.util.Log.e(TAG, "null obj for opening camera");
@@ -550,15 +562,23 @@ public class MySpeech extends CordovaPlugin {
         return 0;
     }
 
-    private int startCameraPreview(final CallbackContext cb) {
+    private int startCameraPreview(JSONArray args, final CallbackContext cb) {
         if(mCamera == null) {
             android.util.Log.e(TAG, "null camera, do nothing");
             cb.error("null camera obj");
             return -1;
         }
 
+        Camera.Parameters camParam = mCamera.getParameters();
+        /* below code suggested by Holly */
+        camParam.setPreviewSize(640, 480);
+        camParam.setPreviewFpsRange(20000, 20000);
+
+        mCamera.setParameters(camParam);
+
         mCamera.setDisplayOrientation(90);
         mCamera.setPreviewCallbackWithBuffer(mCamCallback);
+
         mCamPrevSize = mCamera.getParameters().getPreviewSize();
 
         android.util.Log.e(TAG, "the preview w:"
