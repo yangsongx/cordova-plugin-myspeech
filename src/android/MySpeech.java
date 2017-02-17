@@ -168,6 +168,14 @@ public class MySpeech extends CordovaPlugin {
                || ErrorCode.MSP_ERROR_NO_DATA == error.getErrorCode()) {
                 android.util.Log.e(TAG, "You said nothing at all!");
                 mCb.error("Say Nothing!");
+            } else if (error.getErrorCode() == 10114
+               || ErrorCode.MSP_ERROR_TIME_OUT == error.getErrorCode()) {
+                android.util.Log.e(TAG, "Time out !");
+                mCb.error("MSP_ERROR_TIME_OUT");
+            } else if (error.getErrorCode() == 20001
+               || ErrorCode.ERROR_NO_NETWORK == error.getErrorCode()) {
+                android.util.Log.e(TAG, "no network !");
+                mCb.error("ERROR_NO_NETWORK");
             }
         }
         @Override
