@@ -50,6 +50,7 @@
         </config-file>
 
         <source-file src="src/android/MySpeech.java" target-dir="src/org/ioniconline" />
+        <source-file src="src/android/MyFaceDetect.java" target-dir="src/org/ioniconline" />
         <source-file src="src/android/libs/armeabi/libmsc.so" target-dir="libs/armeabi" />
         <source-file src="src/android/libs/armeabi-v7a/libmsc.so" target-dir="libs/armeabi-v7a" />
         <source-file src="src/android/libs/arm64-v8a/libmsc.so" target-dir="libs/arm64-v8a" />

@@ -103,9 +103,9 @@ public class MySpeech extends CordovaPlugin {
 
                     outputStream.close();
 
-                    imgB64Val = imageBase64Format(mCamDefaultImgName);
+                    //imgB64Val = imageBase64Format(mCamDefaultImgName);
 
-                    mCamCb.success(imgB64Val);
+                    //mCamCb.success(imgB64Val);
 
                     // FIXME - currently, we just need one frame at one time
                     stopCameraPreview();
@@ -119,6 +119,10 @@ public class MySpeech extends CordovaPlugin {
                     ex.printStackTrace();
                 }
 
+                // try detect
+                MyFaceDetect mfd = new MyFaceDetect(mCamDefaultImgName);
+                android.util.Log.i(TAG, "face detected begin...");
+                mfd.faceData();// here just try get some data...
             }
         };
 
