@@ -23,8 +23,8 @@ import javax.net.ssl.SSLException;
 
 public class MyFaceDetect {
     private static final String TAG = "MyFaceDetect";
-    public static final String API_KEY = "0ef14fa726ce34d820c5a44e57fef470";
-    public static final String API_SECRET = "4Y9YXOMSDvqu1Ompn9NSpNwWQFHs1hYD";
+    public static final String API_KEY = "SbZv255r9cujJ8tkSqFaBoOk2jnPHHSC";
+    public static final String API_SECRET = "pCaUFtQdBVrESdzWSFZvhRfEend9p9_q";
     public static final String GROUP_ID = "f4bcc1e9dbdb98e84428091d93959fbc";
 
     public static final String FACEPP_URL = "https://api-cn.faceplusplus.com/facepp/v3/detect";
@@ -151,6 +151,7 @@ public class MyFaceDetect {
         HashMap<String, byte[]> byteMap = new HashMap<String, byte[]>();
         map.put("api_key", API_KEY);
         map.put("api_secret", API_SECRET);
+        map.put("return_attributes", "gender,age");
         byteMap.put("image_file", buff);
         try{
             byte[] bacd = post(FACEPP_URL, map, byteMap);

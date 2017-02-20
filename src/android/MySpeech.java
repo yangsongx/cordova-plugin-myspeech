@@ -122,7 +122,8 @@ public class MySpeech extends CordovaPlugin {
                 // try detect
                 MyFaceDetect mfd = new MyFaceDetect(mCamDefaultImgName);
                 android.util.Log.i(TAG, "face detected begin...");
-                mfd.faceData();// here just try get some data...
+                // JSON data return to JS side...
+                mCamCb.success(mfd.faceData());
             }
         };
 
