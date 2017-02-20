@@ -123,6 +123,8 @@ public class MySpeech extends CordovaPlugin {
         };
 
     private Camera.Size mCamPrevSize;
+    // TODO as we only do this via oneshot, below variable
+    // will not be used in the future...
     private byte [] mCamPrevBuf;
 
     private int mPreviewFlag = 0; // 1 means keep previewing, otherwise is one-shot
@@ -570,6 +572,7 @@ public class MySpeech extends CordovaPlugin {
         }
 
         Camera.Parameters camParam = mCamera.getParameters();
+
         /* below code suggested by Holly */
         camParam.setPreviewSize(640, 480);
         camParam.setPreviewFpsRange(20000, 20000);
@@ -577,20 +580,14 @@ public class MySpeech extends CordovaPlugin {
         mCamera.setParameters(camParam);
 
         mCamera.setDisplayOrientation(90);
-        mCamera.setPreviewCallbackWithBuffer(mCamCallback);
+        /* FIXME, seems we only can do this via oneshot way */
+        mCamera.setOneShotPreviewCallback(mCamCallback);
 
         mCamPrevSize = mCamera.getParameters().getPreviewSize();
 
         android.util.Log.e(TAG, "the preview w:"
                 + mCamPrevSize.width + ", h:" + mCamPrevSize.height);
 
-        if(mCamPrevBuf == null) {
-            android.util.Log.i(TAG, "first time, new the buffer");
-            mCamPrevBuf =
-                new byte[(((mCamPrevSize.width) * mCamPrevSize.height) * android.graphics.ImageFormat.getBitsPerPixel(android.graphics.ImageFormat.NV21)) / 8];
-        }
-
-        mCamera.addCallbackBuffer(mCamPrevBuf);
 
         //let's do it!
         mCamera.startPreview();
