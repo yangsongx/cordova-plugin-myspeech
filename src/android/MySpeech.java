@@ -157,7 +157,7 @@ public class MySpeech extends CordovaPlugin {
         }
     };
 
-    private Camera mCamera;
+    private Camera mCamera = null;
 
     private RecognizerListener mRecognizerListener = new RecognizerListener() {
         @Override
@@ -236,6 +236,15 @@ public class MySpeech extends CordovaPlugin {
             mFirstCall = true; // DO NOT Call it twice
         }
         return 0;
+    }
+
+    @Override
+    public void onDestroy() {
+        android.util.Log.e(TAG, "FINAL CALL?");
+        if(mCamera != null) {
+            mCamera.stopPreview();
+            mCamera.release();
+        }
     }
 
     @Override
