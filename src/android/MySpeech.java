@@ -475,6 +475,10 @@ public class MySpeech extends CordovaPlugin {
          */
         mWakeup.setParameter(SpeechConstant.KEEP_ALIVE,"0");
 
+        // suggest by Yong Xiaowen....
+        mWakeup.setParameter(SpeechConstant.AUDIO_SOURCE,
+                android.media.MediaRecorder.AudioSource.VOICE_RECOGNITION + "");
+
         return 0;
     }
 
