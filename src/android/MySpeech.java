@@ -281,16 +281,32 @@ public class MySpeech extends CordovaPlugin {
 
         } else if (action.equals("initCamera")) {
 
-            initAndroidCamera(args, cb);
+            final JSONArray params = args;
+            cordova.getThreadPool().execute(new Runnable(){
+                @Override
+                public void run() {
+                    initAndroidCamera(params, cb);
+                }
+            });
+
+            //initAndroidCamera(args, cb);
 
         } else if (action.equals("cleanCamera")) {
 
             cleanAndroidCamera(cb);
 
         } else if (action.equals("startCameraPreview")) {
-
             mCamCb = cb;
-            startCameraPreview(args, cb);
+
+            final JSONArray params = args;
+            cordova.getThreadPool().execute(new Runnable(){
+                @Override
+                public void run() {
+                    startCameraPreview(params, cb);
+                }
+            });
+
+            //startCameraPreview(args, cb);
 
         } else if (action.equals("speak")) {
 
