@@ -86,4 +86,12 @@ myspeechApis.initDuMi = function(okCb, failCb) {
             );
 };
 
+myspeechApis.askDuMi = function(okCb, failCb, question) {
+    cordova.exec(okCb, failCb,
+            "MySpeech", // service
+            "askDuMi", // action name
+            question // what are you asking
+            );
+};
+
 module.exports = myspeechApis;

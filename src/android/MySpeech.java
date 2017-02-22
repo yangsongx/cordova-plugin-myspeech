@@ -321,7 +321,16 @@ public class MySpeech extends CordovaPlugin {
 
         } else if (action.equals("initDuMi")) {
 
-            mDm = new MyDuMi(null/*cordova.getActivity()*/);
+            mDm = new MyDuMi(cordova.getActivity().getApplication(),
+                    cb);
+
+        } else if (action.equals("askDuMi")) {
+            if(mDm == null) {
+                android.util.Log.e(TAG, "null dumi");
+                return false;
+            }
+
+            mDm.sendTextData(cb, args.getString(0));
 
         } else if (action.equals("speak")) {
 

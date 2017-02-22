@@ -61,6 +61,12 @@
         <source-file src="src/android/libs/Sunflower.jar" target-dir="libs" />
         <source-file src="src/android/libs/bdasr_v3.0-7.jar" target-dir="libs" />
         <source-file src="src/android/libs/classes.jar" target-dir="libs" />
+        <source-file src="src/android/libs/CrabSDK5.2.0-20160919.jar" target-dir="libs" />
+        <source-file src="src/android/libs/android-async-http-1.4.6.jar" target-dir="libs" />
+        <source-file src="src/android/libs/com.baidu.tts_release.jar" target-dir="libs" />
+        <source-file src="src/android/libs/galaxy-lite-2.0.0.jar" target-dir="libs" />
+        <source-file src="src/android/libs/org.apache.http.legacy.jar" target-dir="libs" />
+
 
         <source-file src="src/android/assets/ivw/576206f0.jet" target-dir="assets/ivw/"/>
      </platform>

@@ -50,25 +50,58 @@ public class MyDuMi{
 
     private DuerSDK  mDmSdk;
 
+    private CallbackContext mCallBack;
+
     final IReceiveMessageListener messageListener = new IReceiveMessageListener() {
         @Override
         public void messageReceive(String megSourceString) {
             try {
                 JSONObject duerMessageJson = new JSONObject(megSourceString);
-                android.util.Log.e(TAG, "the json:" + duerMessageJson.toString(4));
+                mCallBack.success(duerMessageJson.toString(4));
             } catch (Exception e) {
                 e.printStackTrace();
+                mCallBack.error("exception meet");
             }
         }
     };
 
-    public MyDuMi(Application act) {
+    public MyDuMi(Application act, CallbackContext cb) {
+        mCallBack = cb;
+
         mDmSdk = DuerSDKFactory.getDuerSDK();
         mDmSdk.initSDK(act, APP_ID, APP_KEY);
-        android.util.Log.i(TAG, "DuMi inited");
+        mDmSdk.getMessageEngine().setReceiveMessageListener(messageListener);
+
+        android.util.Log.i(TAG, "~~DuMi inited");
+
+        cb.success("OK");
+        android.util.Log.e(TAG, "You should got good data in JS");
     }
 
-    public String sendTextData(String req) {
+    public String sendTextData(CallbackContext cb, String req) {
+        mCallBack = cb;
+
+        android.util.Log.i(TAG, "Will tell DUMI with: " + req);
+
+        SendMessageData sendMessageData = new SendMessageData();
+        sendMessageData.setQuery(req);
+        sendMessageData.setLocalSystemName("wgs84");
+        sendMessageData.setLocalLongitude(116.388171f);
+        sendMessageData.setLocalLatitude(39.931535f);
+
+        mDmSdk.getMessageEngine().sendMessage(sendMessageData,
+                new ISendMessageFinishListener() {
+                    @Override
+                    public void messageSendStatus(MSG_SENDSTATUS status,
+                        DuerMessage duerMessage,
+                        JSONObject errorJson) {
+                        if(status == MSG_SENDSTATUS.MSG_SENDSUCESS) {
+                            android.util.Log.i(TAG, "very good for asking!");
+                        }
+                    }
+
+                });
+
         return "OK";
     }
 }
