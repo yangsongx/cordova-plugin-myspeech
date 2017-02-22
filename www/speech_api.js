@@ -78,4 +78,12 @@ myspeechApis.startCameraPreview = function(okCb, failCb, opt) {
             );
 };
 
+myspeechApis.initDuMi = function(okCb, failCb) {
+    cordova.exec(okCb, failCb,
+            "MySpeech", // service
+            "initDuMi", // action name
+            [] // a blank option
+            );
+};
+
 module.exports = myspeechApis;

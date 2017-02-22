@@ -51,6 +51,7 @@
 
         <source-file src="src/android/MySpeech.java" target-dir="src/org/ioniconline" />
         <source-file src="src/android/MyFaceDetect.java" target-dir="src/org/ioniconline" />
+        <source-file src="src/android/MyDuMi.java" target-dir="src/org/ioniconline" />
         <source-file src="src/android/libs/armeabi/libmsc.so" target-dir="libs/armeabi" />
         <source-file src="src/android/libs/armeabi-v7a/libmsc.so" target-dir="libs/armeabi-v7a" />
         <source-file src="src/android/libs/arm64-v8a/libmsc.so" target-dir="libs/arm64-v8a" />
@@ -58,6 +59,8 @@
         <source-file src="src/android/libs/x86/libmsc.so" target-dir="libs/x86" />
         <source-file src="src/android/libs/Msc.jar" target-dir="libs" />
         <source-file src="src/android/libs/Sunflower.jar" target-dir="libs" />
+        <source-file src="src/android/libs/bdasr_v3.0-7.jar" target-dir="libs" />
+        <source-file src="src/android/libs/classes.jar" target-dir="libs" />
 
         <source-file src="src/android/assets/ivw/576206f0.jet" target-dir="assets/ivw/"/>
      </platform>

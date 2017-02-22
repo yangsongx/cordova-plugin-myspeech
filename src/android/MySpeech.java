@@ -13,6 +13,7 @@ import android.graphics.YuvImage;
 import android.os.Bundle;
 import android.hardware.Camera;
 import android.util.Base64;
+import android.app.Application;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -67,6 +68,8 @@ public class MySpeech extends CordovaPlugin {
         "xiaoqian", // Dong Bei
         "xiaolin" // TaiWan
     };
+
+    private MyDuMi mDm;
 
     private CallbackContext mCb;
 
@@ -315,6 +318,10 @@ public class MySpeech extends CordovaPlugin {
             });
 
             //startCameraPreview(args, cb);
+
+        } else if (action.equals("initDuMi")) {
+
+            mDm = new MyDuMi(null/*cordova.getActivity()*/);
 
         } else if (action.equals("speak")) {
 
