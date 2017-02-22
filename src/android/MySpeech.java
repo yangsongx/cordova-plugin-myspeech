@@ -119,11 +119,19 @@ public class MySpeech extends CordovaPlugin {
                     ex.printStackTrace();
                 }
 
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
                 // try detect
                 MyFaceDetect mfd = new MyFaceDetect(mCamDefaultImgName);
                 android.util.Log.i(TAG, "face detected begin...");
                 // JSON data return to JS side...
                 mCamCb.success(mfd.faceData());
+                    }
+                }).start();
+
+                // end of thread execution
+
             }
         };
 

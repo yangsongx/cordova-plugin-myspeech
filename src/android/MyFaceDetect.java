@@ -102,6 +102,7 @@ public class MyFaceDetect {
                 ins = conne.getErrorStream();
             }
         }catch (SSLException e){
+            android.util.Log.e(TAG, "SSLException:" + e.getMessage());
             e.printStackTrace();
             return new byte[0];
         }
@@ -158,7 +159,8 @@ public class MyFaceDetect {
             str = new String(bacd);
             android.util.Log.e(TAG, mImageFileName + " --> " + str);
         } catch (Exception e) {
-            android.util.Log.e(TAG, "exception meet");
+            android.util.Log.e(TAG, "exception meet:" + e.getMessage() + ", " + e);
+            e.printStackTrace();
         }
 
         return str;
